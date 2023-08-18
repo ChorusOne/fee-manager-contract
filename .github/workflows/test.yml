@@ -1,6 +1,6 @@
-name: test
+name: Fee rewards tests 
 
-on: workflow_dispatch
+on: [push]
 
 env:
   FOUNDRY_PROFILE: ci
@@ -10,7 +10,7 @@ jobs:
     strategy:
       fail-fast: true
 
-    name: Foundry project
+    name: Test smart contracts
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
