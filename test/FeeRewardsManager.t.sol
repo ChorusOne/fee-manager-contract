@@ -71,4 +71,24 @@ contract FeeRewardsTest is Test {
         feeRewardsManager.collectRewards(addrs);
         assertEq(address(feeRewardsManager).balance, 300 ether);
     }
+
+    function testChangeDefaultFee() public {
+        feeRewardsManager.changeDefaultFee(100);
+        assertEq(feeRewardsManager.defaultFeeNominator(), 100);
+
+        address addr = createWithdrawalSimulateRewards(address(100));
+        RewardsCollector(addr).collectRewards();
+        assertEq(address(100).balance, 9.9 ether);
+        // We receive 30%.
+        assertEq(address(feeRewardsManager).balance, 0.1 ether);
+    }
+
+    function testChangeFee() public {
+        address addr = createWithdrawalSimulateRewards(address(100));
+        feeRewardsManager.changeFee(addr, 10000);
+        RewardsCollector(addr).collectRewards();
+        assertEq(address(100).balance, 0 ether);
+        // We receive 30%.
+        assertEq(address(feeRewardsManager).balance, 10 ether);
+    }
 }
