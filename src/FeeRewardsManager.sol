@@ -51,8 +51,8 @@ contract RewardsCollector is Ownable {
 }
 
 contract FeeRewardsManager is Ownable {
-    // 30%
-    uint32 public defaultFeeNominator = 3000;
+    // 28%
+    uint32 public defaultFeeNominator = 2800;
 
     event ContractDeployed(address contractAddress, uint32 feeNominator);
 

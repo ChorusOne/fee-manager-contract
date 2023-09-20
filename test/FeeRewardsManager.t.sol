@@ -39,16 +39,16 @@ contract FeeRewardsTest is Test {
         RewardsCollector(addr).collectRewards();
 
         // User receives 70%.
-        assertEq(withdrawalCredential.balance, 7 ether);
+        assertEq(withdrawalCredential.balance, 7.2 ether);
 
         // We receive 30%.
-        assertEq(address(feeRewardsManager).balance, 3 ether);
+        assertEq(address(feeRewardsManager).balance, 2.8 ether);
 
         feeRewardsManager.getEth(address(101));
 
         // We've got the ether.
         assertEq(address(feeRewardsManager).balance, 0 ether);
-        assertEq(address(101).balance, 3 ether);
+        assertEq(address(101).balance, 2.8 ether);
     }
 
     function createWithdrawalSimulateRewards(
@@ -69,7 +69,7 @@ contract FeeRewardsTest is Test {
             );
         }
         feeRewardsManager.collectRewards(addrs);
-        assertEq(address(feeRewardsManager).balance, 300 ether);
+        assertEq(address(feeRewardsManager).balance, 280 ether);
     }
 
     function testChangeDefaultFee() public {
