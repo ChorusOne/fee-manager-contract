@@ -19,7 +19,7 @@ contract RewardsCollector is Ownable {
 
     // Fee denominator, if `feeNominator = 500`,
     // the tax is 500/10000 = 5/100 = 5%.
-    uint32 constant FEE_DENOMINATOR = 10000;
+    uint32 public constant FEE_DENOMINATOR = 10000;
 
     function collectRewards() public payable {
         uint256 ownerAmount = (address(this).balance * feeNominator) /
@@ -36,8 +36,13 @@ contract RewardsCollector is Ownable {
             owner,
             ownerAmount
         );
+        // This can be used to call this contract again (reentrancy)
+        // but since all funds from this contract are used for the owner
         payable(owner).transfer(ownerAmount);
-        payable(withdrawalCredential).transfer(returnedAmount);
+        (bool sent, ) = payable(withdrawalCredential).call{
+            value: returnedAmount
+        }("");
+        require(sent, "Failed to send Ether back to withdrawal credential");
     }
 
     constructor(address _withdrawalCredential, uint32 _feeNominator) {
@@ -51,8 +56,11 @@ contract RewardsCollector is Ownable {
 }
 
 contract FeeRewardsManager is Ownable {
-    // 28%
-    uint32 public defaultFeeNominator = 2800;
+    uint32 public defaultFeeNominator;
+
+    constructor(uint32 _defaultFeeNominator) {
+        defaultFeeNominator = _defaultFeeNominator;
+    }
 
     event ContractDeployed(address contractAddress, uint32 feeNominator);
 
@@ -67,6 +75,7 @@ contract FeeRewardsManager is Ownable {
             uint256(uint160(_withdrawalCredential)) << 96
         );
         address addr = address(
+            // Uses CREATE2 opcode.
             new RewardsCollector{salt: withdrawalCredentialBytes}(
                 _withdrawalCredential,
                 defaultFeeNominator
@@ -102,7 +111,7 @@ contract FeeRewardsManager is Ownable {
         RewardsCollector(_feeContract).changeFee(_newFee);
     }
 
-    function collectRewards(address[] calldata feeAddresses) public {
+    function batchCollectRewards(address[] calldata feeAddresses) public {
         for (uint32 i = 0; i < feeAddresses.length; ++i) {
             RewardsCollector(feeAddresses[i]).collectRewards();
         }

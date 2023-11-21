@@ -5,11 +5,21 @@ import "forge-std/Test.sol";
 import "forge-std/console.sol";
 import "../src/FeeRewardsManager.sol";
 
+contract ReentrantAttack {
+    fallback() external payable {
+        RewardsCollector(msg.sender).collectRewards();
+    }
+}
+
+contract WithdrawalContract {
+    fallback() external payable {}
+}
+
 contract FeeRewardsTest is Test {
     FeeRewardsManager public feeRewardsManager;
 
     function setUp() public {
-        feeRewardsManager = new FeeRewardsManager();
+        feeRewardsManager = new FeeRewardsManager(2800);
     }
 
     function testHappyPath() public {
@@ -38,10 +48,10 @@ contract FeeRewardsTest is Test {
 
         RewardsCollector(addr).collectRewards();
 
-        // User receives 70%.
+        // User receives 72%.
         assertEq(withdrawalCredential.balance, 7.2 ether);
 
-        // We receive 30%.
+        // We receive 28%.
         assertEq(address(feeRewardsManager).balance, 2.8 ether);
 
         feeRewardsManager.getEth(address(101));
@@ -52,23 +62,27 @@ contract FeeRewardsTest is Test {
     }
 
     function createWithdrawalSimulateRewards(
-        address withdrawalCredential
-    ) public returns (address) {
+        address withdrawalCredential,
+        uint reward
+    ) public returns (RewardsCollector) {
         address addr = feeRewardsManager.createFeeContract(
             withdrawalCredential
         );
-        vm.deal(addr, 10 ether);
-        return addr;
+        vm.deal(addr, reward);
+        return RewardsCollector(addr);
     }
 
     function testGetMultipleRewards() public {
         address[] memory addrs = new address[](100);
         for (uint256 i = 0; i < 100; ++i) {
-            addrs[i] = createWithdrawalSimulateRewards(
-                address(uint160(i + 100))
+            addrs[i] = address(
+                createWithdrawalSimulateRewards(
+                    address(uint160(i + 100)),
+                    10 ether
+                )
             );
         }
-        feeRewardsManager.collectRewards(addrs);
+        feeRewardsManager.batchCollectRewards(addrs);
         assertEq(address(feeRewardsManager).balance, 280 ether);
     }
 
@@ -76,19 +90,79 @@ contract FeeRewardsTest is Test {
         feeRewardsManager.changeDefaultFee(100);
         assertEq(feeRewardsManager.defaultFeeNominator(), 100);
 
-        address addr = createWithdrawalSimulateRewards(address(100));
+        address addr = address(
+            createWithdrawalSimulateRewards(address(100), 10 ether)
+        );
         RewardsCollector(addr).collectRewards();
         assertEq(address(100).balance, 9.9 ether);
-        // We receive 30%.
+        // We receive 1%.
         assertEq(address(feeRewardsManager).balance, 0.1 ether);
     }
 
     function testChangeFee() public {
-        address addr = createWithdrawalSimulateRewards(address(100));
+        address addr = address(
+            createWithdrawalSimulateRewards(address(100), 10 ether)
+        );
         feeRewardsManager.changeFee(addr, 10000);
         RewardsCollector(addr).collectRewards();
         assertEq(address(100).balance, 0 ether);
-        // We receive 30%.
+        // We receive 100%.
         assertEq(address(feeRewardsManager).balance, 10 ether);
+    }
+
+    function testZeroRewards() public {
+        address addr = address(
+            createWithdrawalSimulateRewards(address(100), 0)
+        );
+        vm.expectRevert("Nothing to distribute");
+        RewardsCollector(addr).collectRewards();
+    }
+
+    function testFuzzyHappyPathNoContracts(
+        uint128 rewards,
+        address owner
+    ) public {
+        // Some smart contracts will revert when called, avoid them.
+        vm.assume(owner.code.length == 0);
+        // Avoid some precompiles.
+        vm.assume(owner > address(0x100));
+        vm.assume(rewards > 10000);
+        vm.assume(rewards < 1e30);
+        RewardsCollector collector = createWithdrawalSimulateRewards(
+            owner,
+            rewards
+        );
+        uint256 chorusAmount = (address(collector).balance *
+            uint256(collector.feeNominator())) / collector.FEE_DENOMINATOR();
+        uint256 withdrawalCredentialsAmount = address(collector).balance -
+            chorusAmount;
+        collector.collectRewards();
+        assertEq(address(owner).balance, withdrawalCredentialsAmount);
+        assertEq(address(feeRewardsManager).balance, chorusAmount);
+    }
+
+    function testReentrantAttack() public {
+        ReentrantAttack withdrawalCredentialContract = new ReentrantAttack();
+        address addr = address(
+            createWithdrawalSimulateRewards(
+                address(withdrawalCredentialContract),
+                10 ether
+            )
+        );
+        vm.expectRevert("Failed to send Ether back to withdrawal credential");
+        RewardsCollector(addr).collectRewards();
+    }
+
+    function testSendToContractWithdrawalCredential() public {
+        WithdrawalContract withdrawalCredentialContract = new WithdrawalContract();
+        address addr = address(
+            createWithdrawalSimulateRewards(
+                address(withdrawalCredentialContract),
+                10 ether
+            )
+        );
+        RewardsCollector(addr).collectRewards();
+        assertEq(address(feeRewardsManager).balance, 2.8 ether);
+        assertEq(address(withdrawalCredentialContract).balance, 7.2 ether);
     }
 }
