@@ -21,6 +21,9 @@ contract RewardsCollector is Ownable {
     // the tax is 500/10000 = 5/100 = 5%.
     uint32 public constant FEE_DENOMINATOR = 10000;
 
+    // Allow receiving MEV and other rewards.
+    receive() external payable {}
+
     function collectRewards() public payable {
         uint256 ownerAmount = (address(this).balance * feeNominator) /
             FEE_DENOMINATOR;
@@ -70,7 +73,7 @@ contract FeeRewardsManager is Ownable {
 
     function createFeeContract(
         address _withdrawalCredential
-    ) public returns (address) {
+    ) public returns (address payable) {
         bytes32 withdrawalCredentialBytes = bytes32(
             uint256(uint160(_withdrawalCredential)) << 96
         );
@@ -82,7 +85,7 @@ contract FeeRewardsManager is Ownable {
             )
         );
         emit ContractDeployed(addr, defaultFeeNominator);
-        return addr;
+        return payable(addr);
     }
 
     function predictFeeContractAddress(
@@ -107,11 +110,16 @@ contract FeeRewardsManager is Ownable {
         return address(uint160(uint(hash)));
     }
 
-    function changeFee(address _feeContract, uint32 _newFee) public onlyOwner {
+    function changeFee(
+        address payable _feeContract,
+        uint32 _newFee
+    ) public onlyOwner {
         RewardsCollector(_feeContract).changeFee(_newFee);
     }
 
-    function batchCollectRewards(address[] calldata feeAddresses) public {
+    function batchCollectRewards(
+        address payable[] calldata feeAddresses
+    ) public {
         for (uint32 i = 0; i < feeAddresses.length; ++i) {
             RewardsCollector(feeAddresses[i]).collectRewards();
         }
