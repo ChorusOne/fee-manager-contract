@@ -75,7 +75,7 @@ contract FeeRewardsManager is Ownable {
         address _withdrawalCredential
     ) public returns (address payable) {
         bytes32 withdrawalCredentialBytes = bytes32(
-            uint256(uint160(_withdrawalCredential)) << 96
+            uint256(uint160(_withdrawalCredential))
         );
         address addr = address(
             // Uses CREATE2 opcode.
@@ -97,7 +97,7 @@ contract FeeRewardsManager is Ownable {
             abi.encode(_withdrawalCredential, defaultFeeNumerator)
         );
         bytes32 withdrawalCredentialBytes = bytes32(
-            uint256(uint160(_withdrawalCredential)) << 96
+            uint256(uint160(_withdrawalCredential))
         );
         bytes32 hash = keccak256(
             abi.encodePacked(
