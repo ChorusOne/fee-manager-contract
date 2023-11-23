@@ -14,10 +14,10 @@ contract RewardsCollector is Ownable {
     // 1 - fee % will go to the user in this address.
     address public withdrawalCredential;
 
-    // Nominator of the fee.
-    uint32 public feeNominator;
+    // Fee's numerator.
+    uint32 public feeNumerator;
 
-    // Fee denominator, if `feeNominator = 500`,
+    // Fee denominator, if `feeNumerator = 500`,
     // the tax is 500/10000 = 5/100 = 5%.
     uint32 public constant FEE_DENOMINATOR = 10000;
 
@@ -25,7 +25,7 @@ contract RewardsCollector is Ownable {
     receive() external payable {}
 
     function collectRewards() public payable {
-        uint256 ownerAmount = (address(this).balance * feeNominator) /
+        uint256 ownerAmount = (address(this).balance * feeNumerator) /
             FEE_DENOMINATOR;
         uint256 returnedAmount = address(this).balance - ownerAmount;
         require(
@@ -48,27 +48,27 @@ contract RewardsCollector is Ownable {
         require(sent, "Failed to send Ether back to withdrawal credential");
     }
 
-    constructor(address _withdrawalCredential, uint32 _feeNominator) {
+    constructor(address _withdrawalCredential, uint32 _feeNumerator) {
         withdrawalCredential = _withdrawalCredential;
-        feeNominator = _feeNominator;
+        feeNumerator = _feeNumerator;
     }
 
-    function changeFee(uint32 _newFee) public onlyOwner {
-        feeNominator = _newFee;
+    function changeFee(uint32 _newFeeNumerator) public onlyOwner {
+        feeNumerator = _newFeeNumerator;
     }
 }
 
 contract FeeRewardsManager is Ownable {
-    uint32 public defaultFeeNominator;
+    uint32 public defaultFeeNumerator;
 
-    constructor(uint32 _defaultFeeNominator) {
-        defaultFeeNominator = _defaultFeeNominator;
+    constructor(uint32 _defaultFeeNumerator) {
+        defaultFeeNumerator = _defaultFeeNumerator;
     }
 
-    event ContractDeployed(address contractAddress, uint32 feeNominator);
+    event ContractDeployed(address contractAddress, uint32 feeNumerator);
 
-    function changeDefaultFee(uint32 _newFeeNominator) public onlyOwner {
-        defaultFeeNominator = _newFeeNominator;
+    function changeDefaultFee(uint32 _newFeeNumerator) public onlyOwner {
+        defaultFeeNumerator = _newFeeNumerator;
     }
 
     function createFeeContract(
@@ -81,10 +81,10 @@ contract FeeRewardsManager is Ownable {
             // Uses CREATE2 opcode.
             new RewardsCollector{salt: withdrawalCredentialBytes}(
                 _withdrawalCredential,
-                defaultFeeNominator
+                defaultFeeNumerator
             )
         );
-        emit ContractDeployed(addr, defaultFeeNominator);
+        emit ContractDeployed(addr, defaultFeeNumerator);
         return payable(addr);
     }
 
@@ -94,7 +94,7 @@ contract FeeRewardsManager is Ownable {
         bytes memory bytecode = type(RewardsCollector).creationCode;
         bytecode = abi.encodePacked(
             bytecode,
-            abi.encode(_withdrawalCredential, defaultFeeNominator)
+            abi.encode(_withdrawalCredential, defaultFeeNumerator)
         );
         bytes32 withdrawalCredentialBytes = bytes32(
             uint256(uint160(_withdrawalCredential)) << 96
