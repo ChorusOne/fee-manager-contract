@@ -13,7 +13,9 @@ contract ReentrantAttack {
 
 contract ChangeOwnerContract {
     fallback() external payable {
-        RewardsCollector(payable(msg.sender)).transferOwnership(address(0x200));
+        FeeRewardsManager(payable(msg.sender)).transferOwnership(
+            address(0x200)
+        );
     }
 }
 
@@ -47,7 +49,7 @@ contract FeeRewardsTest is Test {
         // derived address has the parent's as owner
         assertEq(
             address(feeRewardsManager),
-            RewardsCollector(payable(addr)).owner()
+            RewardsCollector(payable(addr)).parentContract()
         );
 
         uint256 amountInContract = address(addr).balance;
@@ -155,7 +157,8 @@ contract FeeRewardsTest is Test {
             rewards
         );
         uint256 chorusAmount = (address(collector).balance *
-            uint256(collector.feeNumerator())) / collector.FEE_DENOMINATOR();
+            uint256(collector.feeNumerator())) /
+            CalculateAndSendRewards.FEE_DENOMINATOR;
         uint256 withdrawalCredentialsAmount = address(collector).balance -
             chorusAmount;
         uint256 chorusBalanceBefore = address(feeRewardsManager).balance;
