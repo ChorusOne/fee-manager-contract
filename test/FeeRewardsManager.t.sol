@@ -161,6 +161,9 @@ contract FeeRewardsTest is Test {
         );
     }
 
+    // Test calling `collectRewards` from a contract that calls `collectRewards`
+    // again, this will revert as the Ether is divided just to Chorus and the
+    // withdrawal credential.
     function testReentrantAttack() public {
         ReentrantAttack withdrawalCredentialContract = new ReentrantAttack();
         address addr = address(
