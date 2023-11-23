@@ -127,6 +127,7 @@ contract FeeRewardsManager is Ownable {
 
     receive() external payable {}
 
+    // Withdraws Eth from the manager contract.
     function getEth(address addr) external onlyOwner {
         payable(addr).transfer(address(this).balance);
     }
