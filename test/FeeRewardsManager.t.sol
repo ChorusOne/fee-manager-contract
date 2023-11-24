@@ -99,7 +99,7 @@ contract FeeRewardsTest is Test {
 
     function testChangeDefaultFee() public {
         feeRewardsManager.changeDefaultFee(100);
-        assertEq(feeRewardsManager.defaultFeeNominator(), 100);
+        assertEq(feeRewardsManager.defaultFeeNumerator(), 100);
 
         address addr = address(
             createWithdrawalSimulateRewards(address(100), 10 ether)
@@ -145,7 +145,7 @@ contract FeeRewardsTest is Test {
             rewards
         );
         uint256 chorusAmount = (address(collector).balance *
-            uint256(collector.feeNominator())) / collector.FEE_DENOMINATOR();
+            uint256(collector.feeNumerator())) / collector.FEE_DENOMINATOR();
         uint256 withdrawalCredentialsAmount = address(collector).balance -
             chorusAmount;
         uint256 chorusBalanceBefore = address(feeRewardsManager).balance;
@@ -161,6 +161,9 @@ contract FeeRewardsTest is Test {
         );
     }
 
+    // Test calling `collectRewards` from a contract that calls `collectRewards`
+    // again, this will revert as the Ether is divided just to Chorus and the
+    // withdrawal credential.
     function testReentrantAttack() public {
         ReentrantAttack withdrawalCredentialContract = new ReentrantAttack();
         address addr = address(
