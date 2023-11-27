@@ -95,6 +95,10 @@ contract FeeRewardsTest is Test {
         }
         feeRewardsManager.batchCollectRewards(addrs);
         assertEq(address(feeRewardsManager).balance, 280 ether);
+
+        for (uint256 i = 0; i < 100; ++i) {
+            assertEq(address(uint160(i + 100)).balance, 7.2 ether);
+        }
     }
 
     function testChangeDefaultFee() public {
