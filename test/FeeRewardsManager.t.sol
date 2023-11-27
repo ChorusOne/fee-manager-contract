@@ -68,6 +68,12 @@ contract FeeRewardsTest is Test {
         // We've got the ether.
         assertEq(address(feeRewardsManager).balance, 0 ether);
         assertEq(address(101).balance, 2.8 ether);
+
+        vm.deal(derivedAddr, 10 ether);
+        RewardsCollector(payable(addr)).collectRewards();
+        assertEq(addr.balance, 0 ether);
+        assertEq(withdrawalCredential.balance, 7.2 ether + 7.2 ether);
+        assertEq(address(101).balance, 2.8 ether);
     }
 
     function createWithdrawalSimulateRewards(
