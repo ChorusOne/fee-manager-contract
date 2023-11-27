@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract RewardsCollector is Ownable {
     event CollectedReward(
         address withdrawalCredential,
-        uint256 withdrawalFee,
+        uint256 withdrawnAmount,
         address owner,
         uint256 ownerFee
     );
@@ -53,7 +53,7 @@ contract RewardsCollector is Ownable {
         feeNumerator = _feeNumerator;
     }
 
-    function changeFee(uint32 _newFeeNumerator) public onlyOwner {
+    function changeFeeNumerator(uint32 _newFeeNumerator) public onlyOwner {
         feeNumerator = _newFeeNumerator;
     }
 }
@@ -88,6 +88,12 @@ contract FeeRewardsManager is Ownable {
         return payable(addr);
     }
 
+    // Predicts the address of a new contract that will be a `fee_recipient` of
+    // an Ethereum validator.
+    // Given the `_withdrawalCredential` we can instantiate a contract that will
+    // be deployed at a deterministic address, calculated given the
+    // `_withdrawalCredential`, the current contract address and the current
+    // contract's bytecode.
     function predictFeeContractAddress(
         address _withdrawalCredential
     ) public view returns (address) {
@@ -110,11 +116,11 @@ contract FeeRewardsManager is Ownable {
         return address(uint160(uint(hash)));
     }
 
-    function changeFee(
+    function changeFeeNumerator(
         address payable _feeContract,
         uint32 _newFee
     ) public onlyOwner {
-        RewardsCollector(_feeContract).changeFee(_newFee);
+        RewardsCollector(_feeContract).changeFeeNumerator(_newFee);
     }
 
     function batchCollectRewards(

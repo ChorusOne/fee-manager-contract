@@ -114,7 +114,7 @@ contract FeeRewardsTest is Test {
         address addr = address(
             createWithdrawalSimulateRewards(address(100), 10 ether)
         );
-        feeRewardsManager.changeFee(payable(addr), 10000);
+        feeRewardsManager.changeFeeNumerator(payable(addr), 10000);
         RewardsCollector(payable(addr)).collectRewards();
         assertEq(address(100).balance, 0 ether);
         // We receive 100%.
