@@ -68,6 +68,12 @@ contract FeeRewardsTest is Test {
         // We've got the ether.
         assertEq(address(feeRewardsManager).balance, 0 ether);
         assertEq(address(101).balance, 2.8 ether);
+
+        vm.deal(derivedAddr, 10 ether);
+        RewardsCollector(payable(addr)).collectRewards();
+        assertEq(addr.balance, 0 ether);
+        assertEq(withdrawalCredential.balance, 7.2 ether + 7.2 ether);
+        assertEq(address(101).balance, 2.8 ether);
     }
 
     function createWithdrawalSimulateRewards(
@@ -95,6 +101,10 @@ contract FeeRewardsTest is Test {
         }
         feeRewardsManager.batchCollectRewards(addrs);
         assertEq(address(feeRewardsManager).balance, 280 ether);
+
+        for (uint256 i = 0; i < 100; ++i) {
+            assertEq(address(uint160(i + 100)).balance, 7.2 ether);
+        }
     }
 
     function testChangeDefaultFee() public {
@@ -114,7 +124,7 @@ contract FeeRewardsTest is Test {
         address addr = address(
             createWithdrawalSimulateRewards(address(100), 10 ether)
         );
-        feeRewardsManager.changeFee(payable(addr), 10000);
+        feeRewardsManager.changeFeeNumerator(payable(addr), 10000);
         RewardsCollector(payable(addr)).collectRewards();
         assertEq(address(100).balance, 0 ether);
         // We receive 100%.
@@ -177,28 +187,14 @@ contract FeeRewardsTest is Test {
     }
 
     function testSendToContractWithdrawalCredential() public {
-        WithdrawalContract withdrawalCredentialContract = new WithdrawalContract();
+        ChangeOwnerContract withdrawalCredentialContract = new ChangeOwnerContract();
         address addr = address(
             createWithdrawalSimulateRewards(
                 address(withdrawalCredentialContract),
                 10 ether
             )
         );
+        vm.expectRevert("Failed to send Ether back to withdrawal credential");
         RewardsCollector(payable(addr)).collectRewards();
-        assertEq(address(feeRewardsManager).balance, 2.8 ether);
-        assertEq(address(withdrawalCredentialContract).balance, 7.2 ether);
-    }
-
-    function testChangeOwnerWithContract() public {
-        WithdrawalContract withdrawalCredentialContract = new WithdrawalContract();
-        address addr = address(
-            createWithdrawalSimulateRewards(
-                address(withdrawalCredentialContract),
-                10 ether
-            )
-        );
-        RewardsCollector(payable(addr)).collectRewards();
-        assertEq(address(feeRewardsManager).balance, 2.8 ether);
-        assertEq(address(withdrawalCredentialContract).balance, 7.2 ether);
     }
 }
