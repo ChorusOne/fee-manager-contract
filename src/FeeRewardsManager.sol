@@ -3,7 +3,14 @@ pragma solidity ^0.8.13;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract RewardsCollector is Ownable {
+// We use a library for the `calculateRewards` function because the less code in
+// `RewardsCollector` the less expensive it it to deploy the collector contract.
+// We can call the library instead of deploying the library's code again and
+// again.
+library CalculateAndSendRewards {
+    // Fee denominator, if `feeNominator = 500`,
+    // the tax is 500/10000 = 5/100 = 5%.
+    uint32 public constant FEE_DENOMINATOR = 10000;
     event CollectedReward(
         address withdrawalCredential,
         uint256 withdrawnAmount,
@@ -11,28 +18,18 @@ contract RewardsCollector is Ownable {
         uint256 ownerFee
     );
 
-    // 1 - fee % will go to the user in this address.
-    address public withdrawalCredential;
-
-    // Fee's numerator.
-    uint32 public feeNumerator;
-
-    // Fee denominator, if `feeNumerator = 500`,
-    // the tax is 500/10000 = 5/100 = 5%.
-    uint32 public constant FEE_DENOMINATOR = 10000;
-
-    // Allow receiving MEV and other rewards.
-    receive() external payable {}
-
-    function collectRewards() public payable {
-        uint256 ownerAmount = (address(this).balance * feeNumerator) /
+    function calculateRewards(
+        uint32 feeNominator,
+        address owner,
+        address withdrawalCredential
+    ) public {
+        uint256 ownerAmount = (address(this).balance * feeNominator) /
             FEE_DENOMINATOR;
         uint256 returnedAmount = address(this).balance - ownerAmount;
         require(
             ownerAmount != 0 || returnedAmount != 0,
             "Nothing to distribute"
         );
-        address owner = owner();
         emit CollectedReward(
             withdrawalCredential,
             returnedAmount,
@@ -47,13 +44,44 @@ contract RewardsCollector is Ownable {
         }("");
         require(sent, "Failed to send Ether back to withdrawal credential");
     }
+}
+
+contract RewardsCollector {
+    // 1 - fee % will go to the user in this address.
+    address public withdrawalCredential;
+
+    // Fee's numerator.
+    uint32 public feeNumerator;
+
+    // This is the contract that created the `RewardsCollector`.
+    // Do not use owner here because this contract is going to be
+    // created multiple times for each `withdrawal credential` and
+    // we don't need any function for the ownership except when changing
+    // the fee.
+    address public parentContract;
+
+    // Allow receiving MEV and other rewards.
+    receive() external payable {}
+
+    function collectRewards() public payable {
+        CalculateAndSendRewards.calculateRewards(
+            feeNumerator,
+            parentContract,
+            withdrawalCredential
+        );
+    }
 
     constructor(address _withdrawalCredential, uint32 _feeNumerator) {
         withdrawalCredential = _withdrawalCredential;
         feeNumerator = _feeNumerator;
+        parentContract = msg.sender;
     }
 
-    function changeFeeNumerator(uint32 _newFeeNumerator) public onlyOwner {
+    function changeFeeNumerator(uint32 _newFeeNumerator) public {
+        require(
+            msg.sender == parentContract,
+            "ChangeFee not called from parent contract"
+        );
         feeNumerator = _newFeeNumerator;
     }
 }
