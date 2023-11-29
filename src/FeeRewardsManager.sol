@@ -3,6 +3,10 @@ pragma solidity ^0.8.13;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
+// We use a library for the `calculateRewards` function because the less code in
+// `RewardsCollector` the less expensive it it to deploy the collector contract.
+// We can call the library instead of deploying the library's code again and
+// again.
 library CalculateAndSendRewards {
     // Fee denominator, if `feeNominator = 500`,
     // the tax is 500/10000 = 5/100 = 5%.
