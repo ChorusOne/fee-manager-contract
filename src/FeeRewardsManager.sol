@@ -43,13 +43,6 @@ library CalculateAndSendRewards {
 }
 
 contract RewardsCollector {
-    event CollectedReward(
-        address withdrawalCredential,
-        uint256 withdrawalFee,
-        address owner,
-        uint256 ownerFee
-    );
-
     // 1 - fee % will go to the user in this address.
     address public withdrawalCredential;
 
@@ -62,10 +55,6 @@ contract RewardsCollector {
     // we don't need any function for the ownership except when changing
     // the fee.
     address public parentContract;
-
-    // Fee denominator, if `feeNumerator = 500`,
-    // the tax is 500/10000 = 5/100 = 5%.
-    uint32 public constant FEE_DENOMINATOR = 10000;
 
     // Allow receiving MEV and other rewards.
     receive() external payable {}
