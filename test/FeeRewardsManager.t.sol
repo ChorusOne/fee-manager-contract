@@ -200,4 +200,17 @@ contract FeeRewardsTest is Test {
         vm.expectRevert("Failed to send Ether back to withdrawal credential");
         RewardsCollector(payable(addr)).collectRewards();
     }
+
+    function testInvalidDefaultFeeNumerator() public {
+        vm.expectRevert("Invalid fee numerator");
+        feeRewardsManager = new FeeRewardsManager(10_001);
+    }
+
+    function testChangeToInvalidFeeNumerator() public {
+        address addr = address(
+            createWithdrawalSimulateRewards(address(100), 10 ether)
+        );
+        vm.expectRevert("Invalid fee numerator");
+        feeRewardsManager.changeFeeNumerator(payable(addr), 10_001);
+    }
 }
