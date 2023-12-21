@@ -71,9 +71,8 @@ contract RewardsCollector {
         );
     }
 
-    constructor(address _withdrawalCredential, uint32 _feeNumerator) {
+    constructor(address _withdrawalCredential) {
         withdrawalCredential = _withdrawalCredential;
-        feeNumerator = _feeNumerator;
         parentContract = msg.sender;
     }
 
@@ -108,15 +107,13 @@ contract FeeRewardsManager is Ownable {
         bytes32 withdrawalCredentialBytes = bytes32(
             uint256(uint160(_withdrawalCredential))
         );
-        address addr = address(
-            // Uses CREATE2 opcode.
-            new RewardsCollector{salt: withdrawalCredentialBytes}(
-                _withdrawalCredential,
-                defaultFeeNumerator
-            )
-        );
-        emit ContractDeployed(addr, defaultFeeNumerator);
-        return payable(addr);
+        // Uses CREATE2 opcode.
+        RewardsCollector rewardsCollector = new RewardsCollector{
+            salt: withdrawalCredentialBytes
+        }(_withdrawalCredential);
+        rewardsCollector.changeFeeNumerator(defaultFeeNumerator);
+        emit ContractDeployed(address(rewardsCollector), defaultFeeNumerator);
+        return payable(address(rewardsCollector));
     }
 
     // Predicts the address of a new contract that will be a `fee_recipient` of
@@ -131,7 +128,7 @@ contract FeeRewardsManager is Ownable {
         bytes memory bytecode = type(RewardsCollector).creationCode;
         bytecode = abi.encodePacked(
             bytecode,
-            abi.encode(_withdrawalCredential, defaultFeeNumerator)
+            abi.encode(_withdrawalCredential)
         );
         bytes32 withdrawalCredentialBytes = bytes32(
             uint256(uint160(_withdrawalCredential))

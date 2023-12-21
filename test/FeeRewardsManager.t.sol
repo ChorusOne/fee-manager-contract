@@ -213,4 +213,34 @@ contract FeeRewardsTest is Test {
         vm.expectRevert("Invalid fee numerator");
         feeRewardsManager.changeFeeNumerator(payable(addr), 10_001);
     }
+
+    function testChangeFeeNumeratorAndWatchPredictedContract() public {
+        address withdrawalCredential = address(100);
+        vm.deal(address(0), 10 ether);
+        address derivedAddr = feeRewardsManager.predictFeeContractAddress(
+            withdrawalCredential
+        );
+        feeRewardsManager.changeDefaultFee(10_000);
+        address derivedAddr2 = feeRewardsManager.predictFeeContractAddress(
+            withdrawalCredential
+        );
+        assert(derivedAddr == derivedAddr2);
+    }
+
+    function testDerivedAddress() public {
+        address withdrawalCredential = address(100);
+        vm.deal(address(0), 10 ether);
+        address derivedAddr = feeRewardsManager.predictFeeContractAddress(
+            withdrawalCredential
+        );
+
+        vm.deal(derivedAddr, 10 ether);
+
+        address payable addr = feeRewardsManager.createFeeContract(
+            withdrawalCredential
+        );
+
+        //derived address matches the function to get one.
+        assertEq(derivedAddr, addr);
+    }
 }
