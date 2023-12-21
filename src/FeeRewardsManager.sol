@@ -166,6 +166,7 @@ contract FeeRewardsManager is Ownable {
 
     // Withdraws Eth from the manager contract.
     function getEth(address addr) external onlyOwner {
-        payable(addr).transfer(address(this).balance);
+        (bool sent, ) = payable(addr).call{value: address(this).balance}("");
+        require(sent, "Failed to get Eth from contract");
     }
 }
