@@ -4,13 +4,13 @@ pragma solidity ^0.8.13;
 import "@openzeppelin/contracts/access/Ownable2Step.sol";
 
 // We use a library for the `calculateRewards` function because the less code in
-// `RewardsCollector` the less expensive it it to deploy the collector contract.
+// `RewardsCollector` the less expensive it is to deploy the collector contract.
 // We can call the library instead of deploying the library's code again and
 // again.
 library CalculateAndSendRewards {
     // Fee denominator, if `feeNominator = 500`,
     // the tax is 500/10000 = 5/100 = 5%.
-    uint32 public constant FEE_DENOMINATOR = 10000;
+    uint32 public constant FEE_DENOMINATOR = 10_000;
     event CollectedReward(
         address withdrawalCredential,
         uint256 withdrawnAmount,
@@ -18,7 +18,7 @@ library CalculateAndSendRewards {
         uint256 ownerFee
     );
 
-    function calculateRewards(
+    function calculateAndSendRewards(
         uint32 feeNominator,
         address owner,
         address withdrawalCredential
@@ -46,7 +46,7 @@ library CalculateAndSendRewards {
 
 contract RewardsCollector {
     // 1 - fee % will go to the user in this address.
-    address public withdrawalCredential;
+    address public immutable withdrawalCredential;
 
     // Fee's numerator.
     uint32 public feeNumerator;
@@ -56,13 +56,13 @@ contract RewardsCollector {
     // created multiple times for each `withdrawal credential` and
     // we don't need any function for the ownership except when changing
     // the fee.
-    address public parentContract;
+    address public immutable parentContract;
 
     // Allow receiving MEV and other rewards.
     receive() external payable {}
 
     function collectRewards() public payable {
-        CalculateAndSendRewards.calculateRewards(
+        CalculateAndSendRewards.calculateAndSendRewards(
             feeNumerator,
             parentContract,
             withdrawalCredential
@@ -80,6 +80,7 @@ contract RewardsCollector {
             msg.sender == parentContract,
             "ChangeFee not called from parent contract"
         );
+        require(_newFeeNumerator <= 10_000, "Invalid fee numerator");
         feeNumerator = _newFeeNumerator;
     }
 }
@@ -88,12 +89,14 @@ contract FeeRewardsManager is Ownable2Step {
     uint32 public defaultFeeNumerator;
 
     constructor(uint32 _defaultFeeNumerator) {
+        require(_defaultFeeNumerator <= 10_000, "Invalid fee numerator");
         defaultFeeNumerator = _defaultFeeNumerator;
     }
 
     event ContractDeployed(address contractAddress, uint32 feeNumerator);
 
     function changeDefaultFee(uint32 _newFeeNumerator) public onlyOwner {
+        require(_newFeeNumerator <= 10_000, "Invalid fee numerator");
         defaultFeeNumerator = _newFeeNumerator;
     }
 
