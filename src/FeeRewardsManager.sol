@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 pragma solidity ^0.8.13;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/access/Ownable2Step.sol";
 
 // We use a library for the `calculateRewards` function because the less code in
 // `RewardsCollector` the less expensive it it to deploy the collector contract.
@@ -86,7 +86,7 @@ contract RewardsCollector {
     }
 }
 
-contract FeeRewardsManager is Ownable {
+contract FeeRewardsManager is Ownable2Step {
     uint32 public defaultFeeNumerator;
 
     constructor(uint32 _defaultFeeNumerator) {
