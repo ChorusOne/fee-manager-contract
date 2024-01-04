@@ -36,7 +36,8 @@ library CalculateAndSendRewards {
         );
         // This can be used to call this contract again (reentrancy)
         // but since all funds from this contract are used for the owner
-        payable(owner).transfer(ownerAmount);
+        (bool ownerSent, ) = payable(owner).call{value: ownerAmount}("");
+        require(ownerSent, "Failed to send Ether back to owner contract");
         (bool sent, ) = payable(withdrawalCredential).call{
             value: returnedAmount
         }("");
