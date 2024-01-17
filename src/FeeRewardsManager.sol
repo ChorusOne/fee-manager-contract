@@ -80,6 +80,7 @@ contract RewardsCollector {
             msg.sender == parentContract,
             "ChangeFee not called from parent contract"
         );
+        // Do not let fee be > 1 (with 10_000 denominator).
         require(_newFeeNumerator <= 10_000, "Invalid fee numerator");
         feeNumerator = _newFeeNumerator;
     }
@@ -89,6 +90,7 @@ contract FeeRewardsManager is Ownable2Step {
     uint32 public defaultFeeNumerator;
 
     constructor(uint32 _defaultFeeNumerator) {
+        // Do not let fee be > 1 (with 10_000 denominator).
         require(_defaultFeeNumerator <= 10_000, "Invalid fee numerator");
         defaultFeeNumerator = _defaultFeeNumerator;
     }
@@ -96,6 +98,7 @@ contract FeeRewardsManager is Ownable2Step {
     event ContractDeployed(address contractAddress, uint32 feeNumerator);
 
     function changeDefaultFee(uint32 _newFeeNumerator) public onlyOwner {
+        // Do not let fee be > 1 (with 10_000 denominator).
         require(_newFeeNumerator <= 10_000, "Invalid fee numerator");
         defaultFeeNumerator = _newFeeNumerator;
     }
