@@ -53,3 +53,29 @@ rewards in 2:
 
 Finally, the owner of `manager` can call `getEth` specifying an address to
 receive the Ether accumulated in the contract.
+
+## Trust Model
+
+Chorus One operates the Ethereum validators with this smart contract. They provide a
+smart contract that should be used as the validator's fee recipient.
+Users are required to place a significant amount of trust in Chorus One. This
+trust encompasses:
+
+1. **Validator Operation**: Users trust that Chorus One will operate its
+validators effectively and in compliance with the network's protocols.
+Slashing penalties are imposed on validators for actions deemed harmful to the
+network, like double signing or downtime. Users trust that Chorus One
+will avoid behaviors that could trigger these penalties, as slashing can lead to
+a partial loss of the staked assets.
+
+2. **Management of Validator Fees**: Validator fees are a portion of the rewards
+earned by validators for their service to the network. Users trust that
+Chorus One will maintain transparency and fairness in setting and distributing
+these fees and not alter the recipient of these fees without clear communication
+and rationale.
+
+3. **Exit Validators on User's behalf**: Users might request to exit their validators,
+in this case, they trust that Chorus One will exit the validators according to user requests.
+
+Users should perform due diligence and continually monitor the validator's
+performance and reputation.
