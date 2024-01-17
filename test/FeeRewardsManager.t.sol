@@ -209,4 +209,47 @@ contract FeeRewardsTest is Test {
         vm.stopPrank();
         assertEq(feeRewardsManager.owner(), address(0x105));
     }
+
+    function testInvalidDefaultFeeNumerator() public {
+        vm.expectRevert("Invalid fee numerator");
+        feeRewardsManager = new FeeRewardsManager(10_001);
+    }
+
+    function testChangeToInvalidFeeNumerator() public {
+        address addr = address(
+            createWithdrawalSimulateRewards(address(100), 10 ether)
+        );
+        vm.expectRevert("Invalid fee numerator");
+        feeRewardsManager.changeFeeNumerator(payable(addr), 10_001);
+    }
+
+    function testChangeFeeNumeratorAndWatchPredictedContract() public {
+        address withdrawalCredential = address(100);
+        vm.deal(address(0), 10 ether);
+        address derivedAddr = feeRewardsManager.predictFeeContractAddress(
+            withdrawalCredential
+        );
+        feeRewardsManager.changeDefaultFee(10_000);
+        address derivedAddr2 = feeRewardsManager.predictFeeContractAddress(
+            withdrawalCredential
+        );
+        assert(derivedAddr == derivedAddr2);
+    }
+
+    function testDerivedAddress() public {
+        address withdrawalCredential = address(100);
+        vm.deal(address(0), 10 ether);
+        address derivedAddr = feeRewardsManager.predictFeeContractAddress(
+            withdrawalCredential
+        );
+
+        vm.deal(derivedAddr, 10 ether);
+
+        address payable addr = feeRewardsManager.createFeeContract(
+            withdrawalCredential
+        );
+
+        //derived address matches the function to get one.
+        assertEq(derivedAddr, addr);
+    }
 }
