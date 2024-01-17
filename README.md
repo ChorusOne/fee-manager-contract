@@ -2,15 +2,28 @@
 
 Contracts for managing validator's rewards fees
 
-## How it works on a high-level
+## Overview
 
-- The repo contains 2 contracts: `FeeRewardsManager` and `RewardsCollector`
-- Fee manager contract `FeeRewardsManager` will be deployed once per environment
+- The repo contains 2 contracts: `FeeRewardsManager` and `RewardsCollector` and a library `CalculateAndSendRewards`
+- Fee manager contract `FeeRewardsManager` will be deployed once per environment.
 - `FeeRewardsManager` creates one `RewardsCollector` contract per withdrawal credentials (some users may have more than 1)
-- On creation `FeeRewardsManager` sets a default commission fee and has permission to change that fee
-- `RewardsCollector` address will be derived from `withdrawal credentials`
-- `RewardsCollector` address will be set as `fee_recipient` for customers validators and earn execution rewards
-- `collectRewards` function in `RewardsCollector` contract can be triggered to send rewards minus commission fee to withdrawal address
+- On creation `FeeRewardsManager` sets a default commission fee and has permission to change that fee.
+- `RewardsCollector` address will be derived from `withdrawal credentials`.
+- `RewardsCollector` address will be set as `fee_recipient` for customers validators and earn execution rewards.
+- `collectRewards` function in `RewardsCollector` contract can be triggered to send rewards minus commission fee to withdrawal .address.
+
+### `RewardsCollector` Contract
+
+- **Ownership**: This contract does not explicitly use an ownership model. Instead, it references a `parentContract`, the contract that deployed it, the `FeeRewardsManager` contract.
+- **withdrawalCredential**: A crucial address that is set upon contract deployment, determining where a portion of the fees are sent.
+- **feeNumerator**: A value determining the fee percentage, modifiable only by the `parentContract`.
+
+### `FeeRewardsManager` Contract
+
+- **Ownership**: Inherits from `Ownable2Step`, a variant of the OpenZeppelin `Ownable` contract, which provides a secure ownership model with a two-step transfer process to prevent accidental loss of ownership. The part that is receiving
+the ownership on the transfer must confirm it with a transaction.
+- **defaultFeeNumerator**: Set upon deployment and modifiable by the contract owner.
+- **Eth Withdrawal**: Only the owner can withdraw Eth from the contract.
 
 ## Walkthrough a normal execution
 
