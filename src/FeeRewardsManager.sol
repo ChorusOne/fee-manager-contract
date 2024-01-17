@@ -23,13 +23,11 @@ library CalculateAndSendRewards {
         address owner,
         address withdrawalCredential
     ) public {
+        require(address(this).balance != 0, "Nothing to distribute");
+
         uint256 ownerAmount = (address(this).balance * feeNominator) /
             FEE_DENOMINATOR;
         uint256 returnedAmount = address(this).balance - ownerAmount;
-        require(
-            ownerAmount != 0 || returnedAmount != 0,
-            "Nothing to distribute"
-        );
         emit CollectedReward(
             withdrawalCredential,
             returnedAmount,
