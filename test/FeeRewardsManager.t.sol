@@ -200,4 +200,13 @@ contract FeeRewardsTest is Test {
         vm.expectRevert("Failed to send Ether back to withdrawal credential");
         RewardsCollector(payable(addr)).collectRewards();
     }
+
+    function testChangeOwnership() public {
+        feeRewardsManager.transferOwnership(address(0x105));
+        assertEq(feeRewardsManager.pendingOwner(), address(0x105));
+        vm.startPrank(address(0x105));
+        feeRewardsManager.acceptOwnership();
+        vm.stopPrank();
+        assertEq(feeRewardsManager.owner(), address(0x105));
+    }
 }
