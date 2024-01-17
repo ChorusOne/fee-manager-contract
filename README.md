@@ -61,5 +61,8 @@ Chorus One will maintain transparency and fairness in setting and distributing
 these fees and not alter the recipient of these fees without clear communication
 and rationale.
 
+3. **Exit Validators on User's behalf**: Users might request to exit their validators,
+in this case, they trust that Chorus One will exit the validators according to user requests.
+
 Users should perform due diligence and continually monitor the validator's
 performance and reputation.
