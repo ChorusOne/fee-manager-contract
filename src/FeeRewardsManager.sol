@@ -89,7 +89,7 @@ contract RewardsCollector {
 contract FeeRewardsManager is Ownable2Step {
     uint32 public defaultFeeNumerator;
 
-    constructor(uint32 _defaultFeeNumerator) {
+    constructor(uint32 _defaultFeeNumerator) Ownable(msg.sender) {
         // Do not let fee be > 1 (with 10_000 denominator).
         require(_defaultFeeNumerator <= 10_000, "Invalid fee numerator");
         defaultFeeNumerator = _defaultFeeNumerator;
