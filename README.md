@@ -25,6 +25,18 @@ the ownership on the transfer must confirm it with a transaction.
 - **defaultFeeNumerator**: Set upon deployment and modifiable by the contract owner.
 - **Eth Withdrawal**: Only the owner can withdraw Eth from the contract.
 
+## Deploying
+
+Copy and populate `.env.dist` to `.env` in the root directory
+To deploy to Goerli, run:
+
+```
+forge script ./script/FeeRewardsManager.s.sol --verify --broadcast --rpc-url goerli --private-key ${PRIVATE_KEY}
+```
+
+Switch to `--rpc-url mainnet` making sure the `mainnet` RPC endpoint exists in the `foundry.toml` file.
+If deploying with a ledger, instead of `--private-key ${PRIVATE_KEY}`, use `--ledger`.
+
 ## Walkthrough a normal execution
 
 Deploy `FeeRewardsManager` as `manager`, then we call
