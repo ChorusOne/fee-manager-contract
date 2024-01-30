@@ -6,8 +6,7 @@ import "../src/FeeRewardsManager.sol";
 
 contract Deployer is Script {
     function run() external {
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        vm.startBroadcast(deployerPrivateKey);
+        vm.startBroadcast();
         new FeeRewardsManager(uint32(vm.envUint("DEFAULT_FEE")));
         vm.stopBroadcast();
     }
