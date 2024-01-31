@@ -9,4 +9,4 @@ libs = ["lib"]
 goerli = "${GOERLI_RPC_URL}"
 
 [etherscan]
-sepolia = { key = "${ETHERSCAN_API_KEY}" }
+all_chains = { key = "${ETHERSCAN_API_KEY}" }
