@@ -14,32 +14,37 @@ library CalculateAndSendRewards {
     event CollectedReward(
         address withdrawalCredential,
         uint256 withdrawnAmount,
-        address owner,
-        uint256 ownerFee
+        address feeRewardsManager,
+        uint256 Fee
     );
 
     function calculateAndSendRewards(
         uint32 feeNominator,
-        address owner,
+        address feeRewardsManager,
         address withdrawalCredential
     ) public {
         require(address(this).balance != 0, "Nothing to distribute");
 
-        uint256 ownerAmount = (address(this).balance * feeNominator) /
+        uint256 feeAmount = (address(this).balance * feeNominator) /
             FEE_DENOMINATOR;
-        uint256 returnedAmount = address(this).balance - ownerAmount;
+        uint256 withdrawAmount = address(this).balance - feeAmount;
         emit CollectedReward(
             withdrawalCredential,
-            returnedAmount,
-            owner,
-            ownerAmount
+            withdrawAmount,
+            feeRewardsManager,
+            feeAmount
         );
-        // This can be used to call this contract again (reentrancy)
-        // but since all funds from this contract are used for the owner
-        (bool ownerSent, ) = payable(owner).call{value: ownerAmount}("");
-        require(ownerSent, "Failed to send Ether back to owner contract");
+        // This can be used to call this contract again (reentrancy) but since
+        // all funds from this contract are used for the feeRewardsManager.
+        (bool feeRewardsManagerSent, ) = payable(feeRewardsManager).call{
+            value: feeAmount
+        }("");
+        require(
+            feeRewardsManagerSent,
+            "Failed to send Ether back to owner contract"
+        );
         (bool sent, ) = payable(withdrawalCredential).call{
-            value: returnedAmount
+            value: withdrawAmount
         }("");
         require(sent, "Failed to send Ether back to withdrawal credential");
     }
