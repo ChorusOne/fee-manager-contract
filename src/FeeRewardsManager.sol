@@ -15,7 +15,7 @@ library CalculateAndSendRewards {
         address withdrawalCredential,
         uint256 withdrawnAmount,
         address feeRewardsManager,
-        uint256 Fee
+        uint256 fee
     );
 
     function calculateAndSendRewards(
