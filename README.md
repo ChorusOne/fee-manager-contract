@@ -43,8 +43,8 @@ This contract is currently deployed on:
 
 | Network      | FeeRewardsManager     | CalculateAndSendRewards |
 |--------------|-----------------------|-------------------------|
-| Goerli | [0xaf0f0d6c4eeb740f62dfe2b10fd9e9b9c90ad3c3](https://goerli.etherscan.io/address/0xaf0f0d6c4eeb740f62dfe2b10fd9e9b9c90ad3c3) | [0xa2f0982aa895c3abbfebb858f0ec011e27d8210b](https://goerli.etherscan.io/address/0xa2f0982aa895c3abbfebb858f0ec011e27d8210b) |
-| Holesky | [0x84aC4E25d621D9c73EF75E2FB4DBf491ae396B8a](https://holesky.etherscan.io/address/0x84aC4E25d621D9c73EF75E2FB4DBf491ae396B8a) | [0x49302ddf4d8651c14c2572a5d1d68d98d6090ded](https://holesky.etherscan.io/address/0x49302ddf4d8651c14c2572a5d1d68d98d6090ded) |
+| Goerli | [0xfc08d0848e2deb0a693f5d9b53ccd1757a539eeb](https://goerli.etherscan.io/address/0xfc08d0848e2deb0a693f5d9b53ccd1757a539eeb) | [0xf8e95de39c5e2e9a4b4d7838f0f7f3a1d73369f6](https://goerli.etherscan.io/address/0xf8e95de39c5e2e9a4b4d7838f0f7f3a1d73369f6) |
+| Holesky | [0xb3c35Fe4EcB02501ebF30C55b18e685661c6bea9](https://holesky.etherscan.io/address/0xb3c35Fe4EcB02501ebF30C55b18e685661c6bea9) | [0x44811C1Ae698B23D64B3A0E88ECc6DA35B30Dd06](https://holesky.etherscan.io/address/0x44811C1Ae698B23D64B3A0E88ECc6DA35B30Dd06) |
 
 ## Walkthrough a normal execution
 
