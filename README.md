@@ -43,6 +43,7 @@ This contract is currently deployed on:
 
 | Network      | FeeRewardsManager     | CalculateAndSendRewards |
 |--------------|-----------------------|-------------------------|
+| Mainnet | [0x5Bab02440602302Fb20906B04051e5D6c074D57f](https://etherscan.io/address/0x5Bab02440602302Fb20906B04051e5D6c074D57f) | [0x8D03884EF3F39ec263F3D7c3954A868468ff8497](https://etherscan.io/address/0x8D03884EF3F39ec263F3D7c3954A868468ff8497)|
 | Goerli | [0x3ca56c8ba036adb672215dc5ed4577a3f1a239d3](https://goerli.etherscan.io/address/0x3ca56c8ba036adb672215dc5ed4577a3f1a239d3) | [0x7f18c4901b68d6aebac40b2e2f5ec3516d95ee2a](https://goerli.etherscan.io/address/0x7f18c4901b68d6aebac40b2e2f5ec3516d95ee2a) |
 | Holesky | [0x8Ef21C0E9d86230cdD73C816cb48987Da3CDaF22](https://holesky.etherscan.io/address/0x8Ef21C0E9d86230cdD73C816cb48987Da3CDaF22) | [0x096874A27f6f9838dCB1422098D389852007244b](https://holesky.etherscan.io/address/0x096874A27f6f9838dCB1422098D389852007244b) |
 
