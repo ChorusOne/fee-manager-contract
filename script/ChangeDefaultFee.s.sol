@@ -11,16 +11,8 @@ contract ChangeFee is Script {
                 payable(address(vm.envAddress("FEE_REWARDS_MANAGER")))
             )
         );
-        address payable addr = payable(
-            feeRewardsManager.predictFeeContractAddress(
-                vm.envAddress("WITHDRAWAL_CREDENTIAL")
-            )
-        );
         vm.startBroadcast();
-        feeRewardsManager.changeFeeNumerator(
-            addr,
-            uint32(vm.envUint("NEW_FEE"))
-        );
+        feeRewardsManager.changeDefaultFee(uint32(vm.envUint("NEW_FEE")));
         vm.stopBroadcast();
     }
 }
